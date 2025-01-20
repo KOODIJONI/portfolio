@@ -11,19 +11,19 @@ export default class LoadLogoBoxes {
       return new Promise((resolve, reject) => {
         const textureLoader = new THREE.TextureLoader();
         const texturePaths = [
-          'images/bash-original.svg',
-          'images/cplusplus-line.svg',
-          'images/css3-original.svg',
-          'images/html5-original.svg',
-          'images/javascript-original.svg',
-          'images/react-original.svg',
-          'images/nodejs-plain.svg',
-          'images/python-original.svg',
-          'images/docker-original.svg',
-          'images/github-original.svg',  // Added github-original.svg
-          'images/mysql-original-wordmark.svg', // Added mysql-original-wordmark.svg
-          'images/php-original.svg',   // Added php-original.svg
-          'images/visualstudio-plain.svg', // Added visualstudio-plain.svg
+          '/images/bash-original.svg',
+          '/images/cplusplus-line.svg',
+          '/images/css3-original.svg',
+          '/images/html5-original.svg',
+          '/images/javascript-original.svg',
+          '/images/react-original.svg',
+          '/images/nodejs-plain.svg',
+          '/images/python-original.svg',
+          '/images/docker-original.svg',
+          '/images/github-original.svg',  // Added github-original.svg
+          '/images/mysql-original-wordmark.svg', // Added mysql-original-wordmark.svg
+          '/images/php-original.svg',   // Added php-original.svg
+          '/images/visualstudio-plain.svg', // Added visualstudio-plain.svg
         ];
   
         const textures = [];

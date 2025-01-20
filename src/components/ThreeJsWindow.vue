@@ -1,10 +1,20 @@
 <template>
   <div ref="container" class="three-container">
-
+    <JoystickComponent
+    size="120"
+    baseColor="rgba(0, 0, 0, 0.4)"
+    stickColor="red"
+    :sticky="true"
+    @move="handleMove"
+    @start="handleStart"
+    @stop="handleStop"
+  />
+    <MyDialog ref="childDialog"></MyDialog>
       </div>
       <div id="gradient-overlay">
         <div></div>
         <v-container>
+      
     <h1 class="elegant-header">JONI MÄYRÄ</h1>
   </v-container>
       <v-btn
@@ -14,13 +24,17 @@
       class="three-btn"
       
     >
+    
       Tutustu
     </v-btn>
     </div>
-
+    
 </template>
 
 <script>
+import { ref} from 'vue'
+import JoystickComponent from './joystick.vue';
+import MyDialog from './myDialog.vue'
 import LoadLogoBoxes from './loadLogoBoxes'
 import CameraSetup from './camera';
 import LightSetup from './lights';
@@ -33,7 +47,6 @@ import CameraControl from './CameraControl';
 import PhysicsWorld from './physicsWorld';
 import RigidBody from './RigidBody';
 import Ammo from 'ammojs-typed';
-import ObjectFile from './objectFile';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
 import { Vector3 } from 'three';
@@ -46,12 +59,18 @@ export default {
       isInitialized: false,
     };
   },
+  components: {
+    JoystickComponent,
+    MyDialog,
+  },
+  
   mounted() {
     this.initThree();
   },
   methods: {
     handleClick() {
       if (!this.isInitialized) {
+      this.childDialog = ref(null)
       this.AudioContextManager.initializeAudioContext(this.camera);
       this.cameraControl = new CameraControl(this.AmmoInstance, this.camera, this.rbCamera,this.scene, this.physicsWorld);
       this.cameraControl.setupControls();
@@ -312,19 +331,19 @@ export default {
   return new Promise((resolve, reject) => {
     const textureLoader = new THREE.TextureLoader();
     const texturePaths = [
-  'images/bash-original.svg',
-  'images/cplusplus-line.svg',
-  'images/css3-original.svg',
-  'images/html5-original.svg',
-  'images/javascript-original.svg',
-  'images/react-original.svg',
-  'images/nodejs-plain.svg',
-  'images/python-original.svg',
-  'images/docker-original.svg',
-  'images/github-original.svg',  // Added github-original.svg
-  'images/mysql-original-wordmark.svg', // Added mysql-original-wordmark.svg
-  'images/php-original.svg',   // Added php-original.svg
-  'images/visualstudio-plain.svg', // Added visualstudio-plain.svg
+  '/images/bash-original.svg',
+  '/images/cplusplus-line.svg',
+  '/images/css3-original.svg',
+  '/images/html5-original.svg',
+  '/images/javascript-original.svg',
+  '/images/react-original.svg',
+  '/images/nodejs-plain.svg',
+  '/images/python-original.svg',
+  '/images/docker-original.svg',
+  '/images/github-original.svg',  // Added github-original.svg
+  '/images/mysql-original-wordmark.svg', // Added mysql-original-wordmark.svg
+  '/images/php-original.svg',   // Added php-original.svg
+  '/images/visualstudio-plain.svg', // Added visualstudio-plain.svg
   
 ];
     const textures = [];
@@ -390,6 +409,9 @@ setupBox(textures) {
     addImage(path, size, pos, rotation){
     // Load the texture
     const map = new THREE.TextureLoader().load(path);
+    map.minFilter = THREE.LinearFilter; 
+    map.magFilter = THREE.LinearFilter; 
+    map.anisotropy = this.renderer.capabilities.getMaxAnisotropy();
 
     // Create a material using the loaded texture
     const material = new THREE.SpriteMaterial({ map: map });
@@ -410,7 +432,7 @@ setupBox(textures) {
 
   loadImages(){
     const position = new THREE.Vector3(-30,5,-20);
-      this.addImage('images/github.png', new THREE.Vector3(4,4,4),position,new Vector3(0,0,0));
+      this.addImage('/images/github.png', new THREE.Vector3(4,4,4),position,new Vector3(0,0,0));
       const cylinderGeometry =new THREE.CylinderGeometry( 3, 3, 0.5, 32 );
       const boxMaterial = new THREE.MeshStandardMaterial({
         color: 0xff5733,
@@ -432,6 +454,9 @@ setupBox(textures) {
       );
       this.githubRB.userData = { name: "github" };
       this.physicsWorld.addRigidBody(this.githubRB, box);
+
+      this.addImage('/images/cv.png', new THREE.Vector3(4,4,4),new THREE.Vector3(-30,5,-10),new Vector3(0,0,0));
+
     
     },
     setupCollisions(){
@@ -439,10 +464,13 @@ setupBox(textures) {
 
       
       this.physicsWorld.physicsWorld_.contactPairTest(this.rbCamera, this.githubRB, {
-      addSingleResult: function(cp, colObj0, partId0, index0, colObj1, partId1, index1) {
-        console.log("Collision detected between camera and GitHub object!");
+        addSingleResult: (cp) => {
+          
+
+          
+
         
-        // Access the contact point
+        console.log("Contact");
         const contactPoint = this.AmmoInstance.wrapPointer(cp, this.AmmoInstance.btManifoldPoint);
         console.log("Contact point:", contactPoint.m_positionWorldOnB);
       }
@@ -456,7 +484,7 @@ setupBox(textures) {
     this.cbContactPairResult = new this.AmmoInstance.ConcreteContactResultCallback();
     this.cbContactPairResult.hasContact = false;
 
-    this.cbContactPairResult.addSingleResult = (cp, colObj0Wrap, partId0, index0, colObj1Wrap, partId1, index1) => {
+    this.cbContactPairResult.addSingleResult = (cp) => {
         let contactPoint = this.AmmoInstance.wrapPointer(cp, this.AmmoInstance.btManifoldPoint);
         const distance = contactPoint.getDistance();
 
@@ -477,7 +505,13 @@ openLinkCollision() {
 
     // Check if there was contact
     if (!this.cbContactPairResult.hasContact) return;
-
+    if (this.$refs.childDialog) {
+              this.$refs.childDialog.openDialog("Haluatko poistua?","Haluatko siirtyä osoitteeseen GITHUB.COM","https://github.com/KOODIJONI");  // Ensure the dialog method is called
+              console.log("jea");
+            }
+            else{
+              console.log("fuck");
+            }
     // If contact was detected, log the collision
     console.log('Collision detected');
 },
