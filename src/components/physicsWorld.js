@@ -62,7 +62,6 @@ export default class PhysicsWorld {
       
       for (let i = 0; i < this.rigidBodies.length; i++) {
         const { mesh, rigidBody } = this.rigidBodies[i];
-        //const body = rigidBody.getBody();
         
         const motionState = rigidBody.body_.getMotionState();
     

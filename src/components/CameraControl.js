@@ -1,10 +1,14 @@
 import * as THREE from 'three';
-
+import Shoot from './shoot';
 export default class CameraControl {
 
-    constructor(AmmoInstance, camera, rbCamera) {
+    constructor(AmmoInstance, camera, rbCamera,scene,physicsWorld) {
         this.AmmoInstance = AmmoInstance;
+        this.scene = scene;
+        this.physicsWorld= physicsWorld;
         this.camera = camera;
+        this.shoot= new Shoot(this.AmmoInstance,this.scene,this.physicsWorld,this.camera)
+
         this.rbCamera = rbCamera;
         this.keys = {};
         this.lastSpacePress = 0;
@@ -29,7 +33,6 @@ export default class CameraControl {
         this.MAX_PITCH = Math.PI / 2;
 
         // AudioContext should be created once after the first user interaction
-        this.audioContext = null;
     }
     
     setupControls() {
@@ -37,13 +40,18 @@ export default class CameraControl {
             this.keys[event.key] = true;
 
             // Create the AudioContext after a user gesture (e.g., first keypress)
-            if (!this.audioContext) {
-                this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            }
+            
         });
 
         window.addEventListener("keyup", (event) => {
             this.keys[event.key] = false;
+        });  
+        let leftClick;
+        window.addEventListener('mousedown', event => {
+            leftClick = event.button === 0 || leftClick;
+            if(leftClick){
+                this.shoot.shootBall();
+            }
         });  
     }
   
@@ -54,12 +62,8 @@ export default class CameraControl {
         const addedAmount = 200;
 
         if (this.keys["w"]||this.keys["W"]) {
-            // Resume the audio context if it's in a suspended state
-            if (this.audioContext && this.audioContext.state === 'suspended') {
-                this.audioContext.resume();
-            }
+            
 
-            console.log("w");
             const direction = this.calculateCameraFacingPosition();
             const currentZ = this.force.z();
             const currentX = this.force.x();

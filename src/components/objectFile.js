@@ -2,7 +2,7 @@ import * as THREE from "three"
 import RigidBody from './RigidBody';
 
 export default class ObjectFile{
-    constructor(root, ammo, scene, scale,pos){
+    constructor(root, ammo, scene, scale,pos,mass){
         
             this.root = root
             this.root.scale.set(scale, scale, scale);
@@ -12,7 +12,7 @@ export default class ObjectFile{
           const boundingBox = new THREE.Box3().setFromObject(this.root); // Create a bounding box for the object
           const size = new THREE.Vector3(); // Vector to hold the size
           boundingBox.getSize(size); // Compute size from bounding box
-          this.RigidBody= new RigidBody(ammo,10,this.root.position, this.root.quaternion, size);
+          this.RigidBody= new RigidBody(ammo,mass,this.root.position, this.root.quaternion, size);
 
           
           console.log('Object Size:', size); // Logs { x, y, z } dimensions
